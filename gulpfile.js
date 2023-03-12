@@ -36,6 +36,10 @@ const paths ={
     html:{
         src: 'src/*html',
         dest: 'dist'
+    },
+    fonts:{
+        src: 'src/fonts/*',
+        dest: 'dist/fonts'
     }
         
 }
@@ -87,7 +91,10 @@ function scripts(){
     .pipe(gulp.dest(paths.scripts.dest))
     .pipe(browserSync.stream())
 }
-
+function fonts(){
+    return gulp.src(paths.fonts.src)
+    .pipe(gulp.dest(paths.fonts.dest))
+}
 function img(){
     return gulp.src(paths.images.src)
     .pipe(newer(paths.images.dest))
@@ -104,13 +111,15 @@ function watch(){
             baseDir: './dist/'
         }
     })
-    gulp.watch(paths.html.dest).on('change',browserSync.reload) 
+    gulp.watch(paths.html.dest).on('change',browserSync.reload)
+    gulp.watch(paths.img.src,img)
     gulp.watch(paths.html.src, html)
     gulp.watch(paths.styles.src, styles)
     gulp.watch(paths.scripts.src, scripts)
 }
 
 const build = gulp.series(clean,html,gulp.parallel(styles,scripts, img),watch)
+export {fonts}
 export {html}
 export {img}
 export {clean}
