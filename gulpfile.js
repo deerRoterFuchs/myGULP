@@ -45,7 +45,7 @@ const paths ={
 }
 // Очистка каталога
 function clean(){
-    return deleteAsync(['dist/*', '!dist/img'])
+    return deleteAsync(['dist/*', '!dist/img', '!dist/fonts'])
 }
 
 function html() {
