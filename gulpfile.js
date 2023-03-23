@@ -14,11 +14,32 @@ import size from "gulp-size";
 import newer from "gulp-newer";
 import browsersync from "browser-sync";
 import {deleteAsync} from 'del';
+import webpackStream from "webpack-stream";
+import gulpIf from "gulp-if";
 
 
 
-const sass = gulpSass(dartSass);
-const browserSync = browsersync.create()
+const sass = gulpSass(dartSass),
+    browserSync = browsersync.create(),
+    webConfig = {
+        output:{
+            filename: 'main.js'
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.js$/,
+                    loader: 'babel-loader',
+                    exclude: '/node_modules/'
+                }
+            ]
+        },
+        mode: isDev ? 'development' : 'production',
+        devtool: isDev ? 'eval-source-map' : 'none'
+    },
+    isDev = true,
+    isProd = !isDev;
+
 //Пути к файлам
 const paths ={
     styles:{
@@ -65,9 +86,9 @@ function styles() {
     .pipe(autoprefixer({
         cascade:false
     }))
-    .pipe(cleanCSS({
+    .pipe(gulpIf(isProd,cleanCSS({
         level:2
-    }))
+    })))
     .pipe(rename({
         basename: 'main',
         suffix: '.min'
@@ -80,14 +101,7 @@ function styles() {
 }
 function scripts(){
     return gulp.src(paths.scripts.src)
-    .pipe(sourcemaps.init())
-    .pipe(babel({
-        presets: ['@babel/env']
-    }))
-    .pipe(uglify())
-    .pipe(concat('main.min.js'))
-    .pipe(sourcemaps.write())
-    .pipe(size())
+    .pipe(webpackStream(webConfig))
     .pipe(gulp.dest(paths.scripts.dest))
     .pipe(browserSync.stream())
 }
